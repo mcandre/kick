@@ -38,8 +38,15 @@ func main() {
 		os.Exit(0)
 	}
 
-	config := kick.Config{
-		Debug: *flagDebug,
+	config := kick.NewConfig()
+	config.Debug = *flagDebug
+
+	if nonce, ok := os.LookupEnv(kick.NonceEnvironmentVariable); ok && nonce == "1" {
+		config.Nonce = true
+	}
+
+	if commitMessage, ok := os.LookupEnv(kick.CommitMessageEnvironmentVariable); ok && commitMessage != "" {
+		config.CommitMessage = commitMessage
 	}
 
 	if err := config.Kick(); err != nil {
