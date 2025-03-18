@@ -2,7 +2,6 @@
 package kick
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -46,6 +45,69 @@ func (o Config) EnsureNonce() error {
 	return os.WriteFile(NoncePath, tRFC3339Bytes, 0644)
 }
 
+// Stage stages any local file changes.
+func (o Config) Stage() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "add", ".")
+	cmd.Env = os.Environ()
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		log.Printf("cmd: %v\n", cmd)
+	}
+
+	return cmd.Run()
+}
+
+// Commit commits any staged changes.
+func (o Config) Commit() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "commit", "-am", o.CommitMessage)
+	cmd.Env = os.Environ()
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		log.Printf("cmd: %v\n", cmd)
+	}
+
+	return cmd.Run()
+}
+
+// Pull pulls any remote changes from the current branch's default remote.
+func (o Config) Pull() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "pull")
+	cmd.Env = os.Environ()
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		log.Printf("cmd: %v\n", cmd)
+	}
+
+	return cmd.Run()
+}
+
+// Push pushes any local changes to the current branch's default remote.
+func (o Config) Push() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "push")
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		log.Printf("cmd: %v\n", cmd)
+	}
+
+	return cmd.Run()
+}
+
 // Kick automates:
 //
 // * Staging all file changes
@@ -63,60 +125,19 @@ func (o Config) Kick() error {
 		}
 	}
 
-	cmd := exec.Command("git")
-	cmd.Args = append(cmd.Args, "add", ".")
-	cmd.Env = os.Environ()
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if o.Debug {
-		log.Printf("cmd: %v\n", cmd)
-	}
-
-	if err := cmd.Run(); err != nil {
+	if err := o.Stage(); err != nil {
 		return err
 	}
 
-	cmd = exec.Command("git")
-	cmd.Args = append(cmd.Args, "commit", "-am", o.CommitMessage)
-	cmd.Env = os.Environ()
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if o.Debug {
-		log.Printf("cmd: %v\n", cmd)
+	if err := o.Commit(); err != nil {
+		if o.Debug {
+			log.Println(err)
+		}
 	}
 
-	if err := cmd.Run(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-	}
-
-	cmd = exec.Command("git")
-	cmd.Args = append(cmd.Args, "pull")
-	cmd.Env = os.Environ()
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if o.Debug {
-		log.Printf("cmd: %v\n", cmd)
-	}
-
-	if err := cmd.Run(); err != nil {
+	if err := o.Pull(); err != nil {
 		return err
 	}
 
-	cmd = exec.Command("git")
-	cmd.Args = append(cmd.Args, "push")
-	cmd.Env = os.Environ()
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if o.Debug {
-		log.Printf("cmd: %v\n", cmd)
-	}
-
-	return cmd.Run()
+	return o.Push()
 }

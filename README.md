@@ -6,8 +6,8 @@
 
 1. Stage all local changes.
 2. Commit all local changes.
-3. Pull any remote changes.
-4. Push any local changes.
+3. Pull remote changes.
+4. Push local changes.
 
 # EXAMPLE
 
