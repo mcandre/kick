@@ -1,4 +1,4 @@
-# kick: git sync automation
+# kick: git sync automator
 
 # ABOUT
 
