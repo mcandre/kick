@@ -2,6 +2,8 @@
 package kick
 
 import (
+	"bufio"
+	"bytes"
 	"log"
 	"os"
 	"os/exec"
@@ -37,10 +39,10 @@ type Config struct {
 	// Nonce enables altering NoncePath to generate commits when repositories are otherwise unchanged (default: false).
 	Nonce bool
 
-	// PullAll enables pulling from all remotes (default: false).
+	// PullAll enables pulling from all remotes (default: true).
 	PullAll bool
 
-	// PushAll enables pushing to all remotes (default: false).
+	// PushAll enables pushing to all remotes (default: true).
 	PushAll bool
 
 	// SyncTags enables pushing and pulling tags (default: true).
@@ -48,14 +50,47 @@ type Config struct {
 
 	// CommitMessage denotes a git commit message (default: DefaultCommitMessage).
 	CommitMessage string
+
+	// remotes tracks the repository's configured remote names.
+	remotes []string
 }
 
 // NewConfig constructs a Config.
 func NewConfig() Config {
 	return Config{
-		CommitMessage: DefaultCommitMessage,
+		PullAll:       true,
+		PushAll:       true,
 		SyncTags:      true,
+		CommitMessage: DefaultCommitMessage,
 	}
+}
+
+// QueryRemotes populates metadata for remotes.
+func (o *Config) QueryRemotes() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "remote")
+	cmd.Env = os.Environ()
+	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		log.Printf("cmd: %v\n", cmd)
+	}
+
+	remotesBytes, err := cmd.Output()
+
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(remotesBytes))
+	o.remotes = o.remotes[:0]
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		o.remotes = append(o.remotes, line)
+	}
+
+	return nil
 }
 
 // EnsureNonce updates NoncePath with the current timestamp.
@@ -144,13 +179,29 @@ func (o Config) Push() error {
 
 // PullTags pulls any remote tags.
 func (o Config) PullTags() error {
-	cmd := exec.Command("git")
-	cmd.Args = append(cmd.Args, "pull", "--tags")
-
 	if o.PullAll {
-		cmd.Args = append(cmd.Args, "--all")
+		for _, remote := range o.remotes {
+			cmd := exec.Command("git")
+			cmd.Args = append(cmd.Args, "pull", remote, "--tags")
+			cmd.Env = os.Environ()
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+
+			if o.Debug {
+				log.Printf("cmd: %v\n", cmd)
+			}
+
+			if err := cmd.Run(); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "pull", "--tags")
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -165,13 +216,29 @@ func (o Config) PullTags() error {
 
 // PushTags pushes any local tags.
 func (o Config) PushTags() error {
-	cmd := exec.Command("git")
-	cmd.Args = append(cmd.Args, "push", "--tags")
-
 	if o.PushAll {
-		cmd.Args = append(cmd.Args, "--all")
+		for _, remote := range o.remotes {
+			cmd := exec.Command("git")
+			cmd.Args = append(cmd.Args, "push", remote, "--tags")
+			cmd.Env = os.Environ()
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+
+			if o.Debug {
+				log.Printf("cmd: %v\n", cmd)
+			}
+
+			if err := cmd.Run(); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "push", "--tags")
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -194,6 +261,10 @@ func (o Config) PushTags() error {
 func (o Config) Kick() error {
 	if o.Debug {
 		log.Printf("config: %v\n", o)
+	}
+
+	if err := o.QueryRemotes(); err != nil {
+		return err
 	}
 
 	if o.Nonce {

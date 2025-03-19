@@ -16,11 +16,11 @@ Useful for generating commits when a repository is otherwise unchanged.
 
 # `KICK_PULL_ALL`
 
-When set to `1`, enables pulling from all remotes (default: `0`).
+When set to `1`, enables pulling from all remotes (default: `1`).
 
 # `KICK_PUSH_ALL`
 
-When set to `1`, enables pushing to all remotes (default: `0`).
+When set to `1`, enables pushing to all remotes (default: `1`).
 
 # `KICK_SYNC_TAGS`
 

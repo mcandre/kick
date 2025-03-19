@@ -45,12 +45,12 @@ func main() {
 		config.Nonce = true
 	}
 
-	if pullAll, ok := os.LookupEnv(kick.PullAllEnvironmentVariable); ok && pullAll == "1" {
-		config.PullAll = true
+	if pullAll, ok := os.LookupEnv(kick.PullAllEnvironmentVariable); ok && pullAll != "1" {
+		config.PullAll = false
 	}
 
-	if pushAll, ok := os.LookupEnv(kick.PushAllEnvironmentVariable); ok && pushAll == "1" {
-		config.PushAll = true
+	if pushAll, ok := os.LookupEnv(kick.PushAllEnvironmentVariable); ok && pushAll != "1" {
+		config.PushAll = false
 	}
 
 	if syncTags, ok := os.LookupEnv(kick.SyncTagsEnvironmentVariable); ok && syncTags != "1" {
