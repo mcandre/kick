@@ -45,6 +45,14 @@ func main() {
 		config.Nonce = true
 	}
 
+	if pullAll, ok := os.LookupEnv(kick.PullAllEnvironmentVariable); ok && pullAll == "1" {
+		config.PullAll = true
+	}
+
+	if pushAll, ok := os.LookupEnv(kick.PushAllEnvironmentVariable); ok && pushAll == "1" {
+		config.PushAll = true
+	}
+
 	if commitMessage, ok := os.LookupEnv(kick.CommitMessageEnvironmentVariable); ok {
 		config.CommitMessage = commitMessage
 	}

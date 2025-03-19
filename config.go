@@ -20,6 +20,12 @@ const NoncePath = ".kick"
 // NonceEnvironmentVariable denotes the name of the environment variable controlling nonces.
 const NonceEnvironmentVariable = "KICK_NONCE"
 
+// PullAllEnvironmentVariable denotes the name of the environment variable controlling whether pulls process all remotes.
+const PullAllEnvironmentVariable = "KICK_PULL_ALL"
+
+// PushAllEnvironmentVariable denotes the name of the environment variable controlling whether pushes process all remotes.
+const PushAllEnvironmentVariable = "KICK_PUSH_ALL"
+
 // Config prepares high level git sync operations.
 type Config struct {
 	// Debug enables additional logging (default: false).
@@ -27,6 +33,12 @@ type Config struct {
 
 	// Nonce enables altering NoncePath to generate commits when repositories are otherwise unchanged (default: false).
 	Nonce bool
+
+	// PullAll enables pulling from all remotes (default: false).
+	PullAll bool
+
+	// PushAll enables pushing to all remotes (default: false).
+	PushAll bool
 
 	// CommitMessage denotes a git commit message (default: DefaultCommitMessage).
 	CommitMessage string
@@ -86,6 +98,11 @@ func (o Config) Commit() error {
 func (o Config) Pull() error {
 	cmd := exec.Command("git")
 	cmd.Args = append(cmd.Args, "pull")
+
+	if o.PullAll {
+		cmd.Args = append(cmd.Args, "--all")
+	}
+
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -102,6 +119,11 @@ func (o Config) Pull() error {
 func (o Config) Push() error {
 	cmd := exec.Command("git")
 	cmd.Args = append(cmd.Args, "push")
+
+	if o.PushAll {
+		cmd.Args = append(cmd.Args, "--all")
+	}
+
 	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
