@@ -64,7 +64,12 @@ func (o Config) Stage() error {
 // Commit commits any staged changes.
 func (o Config) Commit() error {
 	cmd := exec.Command("git")
-	cmd.Args = append(cmd.Args, "commit", "-am", o.CommitMessage)
+	cmd.Args = append(cmd.Args, "commit", "-a")
+
+	if o.CommitMessage != "" {
+		cmd.Args = append(cmd.Args, "-m", o.CommitMessage)
+	}
+
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

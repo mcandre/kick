@@ -45,7 +45,7 @@ func main() {
 		config.Nonce = true
 	}
 
-	if commitMessage, ok := os.LookupEnv(kick.CommitMessageEnvironmentVariable); ok && commitMessage != "" {
+	if commitMessage, ok := os.LookupEnv(kick.CommitMessageEnvironmentVariable); ok {
 		config.CommitMessage = commitMessage
 	}
 
