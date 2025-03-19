@@ -257,7 +257,7 @@ func (o Config) PushTags() error {
 // * Committing all changes
 // * Pulling any remote changes
 // * Pushing any local changes
-// * Pulling and pushing tags (optional)
+// * Pulling and pushing tags
 func (o Config) Kick() error {
 	if o.Debug {
 		log.Printf("config: %v\n", o)

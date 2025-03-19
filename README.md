@@ -8,6 +8,7 @@
 2. Commit all local changes.
 3. Pull remote changes.
 4. Push local changes.
+5. Pull and push tags.
 
 # EXAMPLE
 
