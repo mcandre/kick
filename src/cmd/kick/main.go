@@ -53,6 +53,10 @@ func main() {
 		config.PushAll = true
 	}
 
+	if syncTags, ok := os.LookupEnv(kick.SyncTagsEnvironmentVariable); ok && syncTags != "1" {
+		config.SyncTags = false
+	}
+
 	if commitMessage, ok := os.LookupEnv(kick.CommitMessageEnvironmentVariable); ok {
 		config.CommitMessage = commitMessage
 	}

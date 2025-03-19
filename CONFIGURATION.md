@@ -21,3 +21,7 @@ When set to `1`, enables pulling from all remotes (default: `0`).
 # `KICK_PUSH_ALL`
 
 When set to `1`, enables pushing to all remotes (default: `0`).
+
+# `KICK_SYNC_TAGS`
+
+When set to `1`, enables pushing and pulling tags (default: `1`).

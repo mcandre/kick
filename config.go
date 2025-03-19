@@ -26,6 +26,9 @@ const PullAllEnvironmentVariable = "KICK_PULL_ALL"
 // PushAllEnvironmentVariable denotes the name of the environment variable controlling whether pushes process all remotes.
 const PushAllEnvironmentVariable = "KICK_PUSH_ALL"
 
+// SyncTagsEnvironmentVariable denotes the name of the environment variable controlling whether to push and pull tags.
+const SyncTagsEnvironmentVariable = "KICK_SYNC_TAGS"
+
 // Config prepares high level git sync operations.
 type Config struct {
 	// Debug enables additional logging (default: false).
@@ -40,6 +43,9 @@ type Config struct {
 	// PushAll enables pushing to all remotes (default: false).
 	PushAll bool
 
+	// SyncTags enables pushing and pulling tags (default: true).
+	SyncTags bool
+
 	// CommitMessage denotes a git commit message (default: DefaultCommitMessage).
 	CommitMessage string
 }
@@ -48,6 +54,7 @@ type Config struct {
 func NewConfig() Config {
 	return Config{
 		CommitMessage: DefaultCommitMessage,
+		SyncTags:      true,
 	}
 }
 
@@ -94,7 +101,7 @@ func (o Config) Commit() error {
 	return cmd.Run()
 }
 
-// Pull pulls any remote changes from the current branch's default remote.
+// Pull pulls any remote changes.
 func (o Config) Pull() error {
 	cmd := exec.Command("git")
 	cmd.Args = append(cmd.Args, "pull")
@@ -115,7 +122,7 @@ func (o Config) Pull() error {
 	return cmd.Run()
 }
 
-// Push pushes any local changes to the current branch's default remote.
+// Push pushes any local changes.
 func (o Config) Push() error {
 	cmd := exec.Command("git")
 	cmd.Args = append(cmd.Args, "push")
@@ -135,12 +142,55 @@ func (o Config) Push() error {
 	return cmd.Run()
 }
 
+// PullTags pulls any remote tags.
+func (o Config) PullTags() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "pull", "--tags")
+
+	if o.PullAll {
+		cmd.Args = append(cmd.Args, "--all")
+	}
+
+	cmd.Env = os.Environ()
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		log.Printf("cmd: %v\n", cmd)
+	}
+
+	return cmd.Run()
+}
+
+// PushTags pushes any local tags.
+func (o Config) PushTags() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "push", "--tags")
+
+	if o.PushAll {
+		cmd.Args = append(cmd.Args, "--all")
+	}
+
+	cmd.Env = os.Environ()
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		log.Printf("cmd: %v\n", cmd)
+	}
+
+	return cmd.Run()
+}
+
 // Kick automates:
 //
 // * Staging all file changes
 // * Committing all changes
 // * Pulling any remote changes
 // * Pushing any local changes
+// * Pulling and pushing tags (optional)
 func (o Config) Kick() error {
 	if o.Debug {
 		log.Printf("config: %v\n", o)
@@ -166,5 +216,19 @@ func (o Config) Kick() error {
 		return err
 	}
 
-	return o.Push()
+	if err := o.Push(); err != nil {
+		return err
+	}
+
+	if o.SyncTags {
+		if err := o.PullTags(); err != nil {
+			return err
+		}
+
+		if err := o.PushTags(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
