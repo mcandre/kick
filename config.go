@@ -22,6 +22,9 @@ const NoncePath = ".kick"
 // NonceEnvironmentVariable denotes the name of the environment variable controlling nonces.
 const NonceEnvironmentVariable = "KICK_NONCE"
 
+// FetchAllEnvironmentVariable denotes the name of the environment variable controlling whether fetches process all remotes.
+const FetchAllEnvironmentVariable = "KICK_FETCH_ALL"
+
 // PullAllEnvironmentVariable denotes the name of the environment variable controlling whether pulls process all remotes.
 const PullAllEnvironmentVariable = "KICK_PULL_ALL"
 
@@ -38,6 +41,9 @@ type Config struct {
 
 	// Nonce enables altering NoncePath to generate commits when repositories are otherwise unchanged (default: false).
 	Nonce bool
+
+	// FetchAll enables fetching from all remotes (default: true).
+	FetchAll bool
 
 	// PullAll enables pulling from all remotes (default: true).
 	PullAll bool
@@ -58,6 +64,7 @@ type Config struct {
 // NewConfig constructs a Config.
 func NewConfig() Config {
 	return Config{
+		FetchAll:      true,
 		PullAll:       true,
 		PushAll:       true,
 		SyncTags:      true,
@@ -177,31 +184,15 @@ func (o Config) Push() error {
 	return cmd.Run()
 }
 
-// PullTags pulls any remote tags.
-func (o Config) PullTags() error {
-	if o.PullAll {
-		for _, remote := range o.remotes {
-			cmd := exec.Command("git")
-			cmd.Args = append(cmd.Args, "pull", remote, "--tags")
-			cmd.Env = os.Environ()
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
+// FetchTags fetches any remote tags.
+func (o Config) FetchTags() error {
+	cmd := exec.Command("git")
+	cmd.Args = append(cmd.Args, "fetch", "--tags")
 
-			if o.Debug {
-				log.Printf("cmd: %v\n", cmd)
-			}
-
-			if err := cmd.Run(); err != nil {
-				return err
-			}
-		}
-
-		return nil
+	if o.FetchAll {
+		cmd.Args = append(cmd.Args, "--all")
 	}
 
-	cmd := exec.Command("git")
-	cmd.Args = append(cmd.Args, "pull", "--tags")
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -292,7 +283,7 @@ func (o Config) Kick() error {
 	}
 
 	if o.SyncTags {
-		if err := o.PullTags(); err != nil {
+		if err := o.FetchTags(); err != nil {
 			return err
 		}
 
