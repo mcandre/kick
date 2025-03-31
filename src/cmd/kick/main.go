@@ -62,6 +62,10 @@ func main() {
 	}
 
 	if err := config.Kick(); err != nil {
-		log.Fatal(err)
+		if config.Debug {
+			log.Fatal(err)
+		}
+
+		log.Fatal("git crashed, enable -debug to diagnose")
 	}
 }

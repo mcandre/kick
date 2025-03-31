@@ -4,6 +4,7 @@ package kick
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -112,8 +113,14 @@ func (o Config) Stage() error {
 	cmd.Args = append(cmd.Args, "add", ".")
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stdout = io.Discard
+		cmd.Stderr = io.Discard
+	}
 
 	if o.Debug {
 		log.Printf("cmd: %v\n", cmd)
@@ -133,8 +140,14 @@ func (o Config) Commit() error {
 
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stdout = io.Discard
+		cmd.Stderr = io.Discard
+	}
 
 	if o.Debug {
 		log.Printf("cmd: %v\n", cmd)
@@ -154,8 +167,14 @@ func (o Config) Pull() error {
 
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stdout = io.Discard
+		cmd.Stderr = io.Discard
+	}
 
 	if o.Debug {
 		log.Printf("cmd: %v\n", cmd)
@@ -174,8 +193,15 @@ func (o Config) Push() error {
 	}
 
 	cmd.Env = os.Environ()
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	if o.Debug {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stdout = io.Discard
+		cmd.Stderr = io.Discard
+	}
 
 	if o.Debug {
 		log.Printf("cmd: %v\n", cmd)
@@ -195,8 +221,14 @@ func (o Config) FetchTags() error {
 
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stdout = io.Discard
+		cmd.Stderr = io.Discard
+	}
 
 	if o.Debug {
 		log.Printf("cmd: %v\n", cmd)
@@ -213,8 +245,14 @@ func (o Config) PushTags() error {
 			cmd.Args = append(cmd.Args, "push", remote, "--tags")
 			cmd.Env = os.Environ()
 			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
+
+			if o.Debug {
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+			} else {
+				cmd.Stdout = io.Discard
+				cmd.Stderr = io.Discard
+			}
 
 			if o.Debug {
 				log.Printf("cmd: %v\n", cmd)
@@ -232,8 +270,14 @@ func (o Config) PushTags() error {
 	cmd.Args = append(cmd.Args, "push", "--tags")
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	if o.Debug {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stdout = io.Discard
+		cmd.Stderr = io.Discard
+	}
 
 	if o.Debug {
 		log.Printf("cmd: %v\n", cmd)
