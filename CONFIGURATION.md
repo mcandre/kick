@@ -14,6 +14,10 @@ When set to `1`, enables updating a `.kick` nonce file with a timestamp (default
 
 Useful for generating commits when a repository is otherwise unchanged.
 
+# `KICK_FETCH_ALL`
+
+When set to `1`, enables fetching (tags) from all remotes (default: `1`).
+
 # `KICK_PULL_ALL`
 
 When set to `1`, enables pulling from all remotes (default: `1`).
