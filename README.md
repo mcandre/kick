@@ -6,9 +6,9 @@
 
 1. Stage all local changes.
 2. Commit all local changes.
-3. Pull remote changes.
+3. Pull remote changes and tags.
 4. Push local changes.
-5. Pull and push tags.
+5. Push tags and changes.
 
 # EXAMPLE
 
