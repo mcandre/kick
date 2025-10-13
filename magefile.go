@@ -67,17 +67,6 @@ func Shadow() error { return mageextras.GoVetShadow() }
 // Staticcheck runs staticcheck.
 func Staticcheck() error { return mageextras.Staticcheck("./...") }
 
-// Unmake runs unmake.
-func Unmake() error {
-	err := mageextras.Unmake(".")
-
-	if err != nil {
-		return err
-	}
-
-	return mageextras.Unmake("-n", ".")
-}
-
 // Lint runs the lint suite.
 func Lint() error {
 	mg.Deps(Deadcode)
@@ -88,7 +77,6 @@ func Lint() error {
 	mg.Deps(Nakedret)
 	mg.Deps(Shadow)
 	mg.Deps(Staticcheck)
-	mg.Deps(Unmake)
 	return nil
 }
 
