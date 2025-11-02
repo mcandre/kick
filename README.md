@@ -1,5 +1,9 @@
 # kick: git sync automator
 
+# DEPRECATED
+
+See https://github.com/mcandre/kickers
+
 # ABOUT
 
 `kick` automates a common git workflow:
